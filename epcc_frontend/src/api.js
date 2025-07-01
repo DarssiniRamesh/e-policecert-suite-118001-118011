@@ -1,4 +1,4 @@
-const API_BASE = process.env.REACT_APP_EPCC_BACKEND_URL || "http://localhost:3001";
+const API_BASE = "https://vscode-internal-74-beta.beta01.cloud.kavia.ai:3001";
 
 // PUBLIC_INTERFACE
 export async function apiRequest(path, method = "GET", data = null, token = null, files = null) {

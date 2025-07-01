@@ -59,9 +59,7 @@
 }
 
 .theme-toggle {
-  position: absolute;
-  top: 20px;
-  right: 20px;
+  /* Remove absolute placement for button used inline */
   background-color: var(--button-bg);
   color: var(--button-text);
   border: none;
@@ -72,16 +70,81 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0 4px;
+  min-width: 96px;
+  display: inline-block;
 }
 
-.theme-toggle:hover {
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  opacity: 0.9;
+  opacity: 0.95;
 }
 
 .theme-toggle:active {
   transform: translateY(0);
+}
+
+button,
+input[type="submit"],
+input[type="button"] {
+  font-family: inherit;
+  font-size: 1rem;
+  border-radius: 0.5em;
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  transition: background .2s, color .2s, box-shadow .2s;
+  cursor: pointer;
+}
+
+button[disabled],
+input[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Forms and containers */
+.container {
+  background: var(--bg-primary);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #dedede30;
+  padding: 32px 18px;
+  margin: 24px auto;
+  max-width: 650px;
+}
+
+input, select, textarea {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 7px 0 16px 0;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--text-secondary);
+  border-color: var(--text-secondary);
+}
+
+/* Responsive design for mobile */
+@media (max-width: 768px) {
+  .theme-toggle {
+    padding: 8px 12px;
+    font-size: 12px;
+    min-width: unset;
+  }
+
+  .container {
+    padding: 10vw 3vw;
+    max-width: 97vw;
+  }
 }
 
 @keyframes App-logo-spin {
