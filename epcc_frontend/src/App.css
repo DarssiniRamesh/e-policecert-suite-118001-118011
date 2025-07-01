@@ -1,18 +1,35 @@
 /* CSS Variables for Theme Management */
 :root {
-  /* Light theme colors */
-  --epcc-navy: #1E2A38;
-  --epcc-blue: #1976D2;
-  --epcc-blue-accent: #1E88E5;
-  --epcc-green: #43A047;
+  /* RFP-compliant Navy + Blue government theme */
+  --epcc-navy: #1e2a38;
+  --epcc-blue: #1976d2;
+  --epcc-blue-accent: #1e88e5;
+  --epcc-green: #43a047;
   --epcc-gray: #e3e8ef;
-  --bg-primary: #f9fafc;
+  --epcc-light: #f9fafc;
+  --epcc-danger: #ce2b28;
+  /* Layout */
+  --sidebar-bg: #1e2a38;
+  --sidebar-active: #1976d2;
+  --sidebar-hover: #21344b;
+  --nav-bg: #1e2a38;
+  --nav-shadow: 0 1.5px 12px #1a244033;
+  /* General backgrounds */
+  --bg-primary: #f6f8fa;
   --bg-secondary: #fff;
-  --text-primary: #1E2A38;
-  --text-secondary: #1976D2;
+  --card-bg: #fff;
+  --card-shadow: 0 2px 8px #1e2a3805;
   --border-color: #e3e8ef;
-  --button-bg: #1976D2;
+  /* Text */
+  --text-primary: #1e2a38;
+  --text-secondary: #1976d2;
+  --text-nav: #fff;
+  --text-sidebar: #e3e8ef;
+  /* Buttons */
+  --button-bg: #1976d2;
   --button-text: #fff;
+  --button-secondary-bg: #eaf1fe;
+  --button-secondary-text: #1976d2;
 }
 
 [data-theme="dark"] {

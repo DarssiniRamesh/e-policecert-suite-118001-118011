@@ -21,14 +21,15 @@ export default function TopNavBar({ toggleTheme, theme, onSidebar }) {
     <nav
       style={{
         height: 60,
-        background: "var(--bg-secondary)",
+        background: "var(--nav-bg)",
+        boxShadow: "var(--nav-shadow)",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         position: "fixed",
         width: "100%",
         zIndex: 100,
-        boxShadow: "0 1px 4px #dedede90",
+        borderBottom: "1.5px solid var(--border-color)",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
@@ -36,12 +37,12 @@ export default function TopNavBar({ toggleTheme, theme, onSidebar }) {
           onClick={onSidebar}
           aria-label="Open sidebar"
           style={{
-            margin: "0 16px",
-            fontSize: 22,
+            margin: "0 16px 0 7px",
+            fontSize: 23,
             background: "none",
             border: "none",
             cursor: "pointer",
-            color: "var(--text-primary)",
+            color: "#fff",
           }}
         >
           ≡
@@ -49,10 +50,13 @@ export default function TopNavBar({ toggleTheme, theme, onSidebar }) {
         <span
           style={{
             fontWeight: "bold",
-            fontSize: 20,
-            color: "var(--text-primary)",
+            fontSize: 22,
+            color: "#fff",
             letterSpacing: "1px",
             cursor: "pointer",
+            fontFamily: "system-ui,sans-serif",
+            textShadow: "0 1px 6px #1e2a3831",
+            verticalAlign: "middle",
           }}
           onClick={handleLogoClick}
         >
@@ -69,10 +73,12 @@ export default function TopNavBar({ toggleTheme, theme, onSidebar }) {
             padding: "8px 12px",
             borderRadius: 8,
             border: "none",
-            background: "var(--border-color)",
-            color: "var(--text-primary)",
+            background: "#ffffff15",
+            color: "#fff",
             cursor: "pointer",
             fontWeight: 600,
+            fontSize: 15,
+            boxShadow: "none"
           }}
           onClick={handleChangeLang}
         >
@@ -82,13 +88,16 @@ export default function TopNavBar({ toggleTheme, theme, onSidebar }) {
           <button
             style={{
               marginLeft: 16,
-              padding: "8px 12px",
+              padding: "8px 13px",
               borderRadius: 8,
               border: "none",
-              background: "#ce2b28",
-              color: "white",
+              background: "var(--epcc-danger)",
+              color: "#fff",
               fontWeight: "bold",
+              fontSize: 15.5,
               cursor: "pointer",
+              boxShadow: "none",
+              textTransform: "uppercase"
             }}
             onClick={() => {
               removeAuthToken();
