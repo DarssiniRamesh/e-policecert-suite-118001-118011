@@ -8,6 +8,7 @@ export default function DocumentUpload() {
   const [file, setFile] = useState(null);
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
+  const [appId, setAppId] = useState("");
 
   const handleChange = (e) => {
     setFile(e.target.files[0]);
@@ -20,9 +21,14 @@ export default function DocumentUpload() {
       setMsg("No file selected");
       return;
     }
+    if (!appId) {
+      setMsg("Application ID required");
+      return;
+    }
     setLoading(true);
     const formData = new FormData();
-    formData.append("document", file);
+    formData.append("application_id", appId);
+    formData.append("file", file);
     try {
       await apiRequest("/documents/upload", "POST", null, getAuthToken(), formData);
       setMsg("File uploaded!");
@@ -37,6 +43,16 @@ export default function DocumentUpload() {
     <div className="container" style={{ maxWidth: 460, margin: "32px auto" }}>
       <h2>{t("upload_documents")}</h2>
       <form onSubmit={handleSubmit}>
+        <div>
+          <input
+            type="text"
+            style={{ width: "100%", margin: "10px 0", padding: 8 }}
+            placeholder="Application ID"
+            value={appId}
+            onChange={e => setAppId(e.target.value)}
+            required
+          />
+        </div>
         <input
           type="file"
           accept="*"

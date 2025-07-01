@@ -21,10 +21,11 @@ export default function ApplicationForm() {
     }
     setLoading(true);
     try {
+      // Backend expects { details: { type, info } }
       await apiRequest(
         "/applications",
         "POST",
-        { type, info },
+        { details: { type, info } },
         getAuthToken()
       );
       setSuccess("Application submitted!");

@@ -12,7 +12,7 @@ export default function UserApplications() {
     const fetchApps = async () => {
       try {
         const data = await apiRequest(
-          "/applications/user",
+          "/applications",
           "GET",
           null,
           getAuthToken()

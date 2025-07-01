@@ -17,12 +17,10 @@ export default function AdminDashboard() {
     async function fetchData() {
       setErr(""); setLoading(true);
       try {
-        const [u, a] = await Promise.all([
-          apiRequest("/admin/users", "GET", null, getAuthToken()),
-          apiRequest("/admin/applications", "GET", null, getAuthToken()),
-        ]);
-        setUsers(u.users || []);
+        // Remove /admin/users (not implemented); only fetch applications.
+        const a = await apiRequest("/admin/applications", "GET", null, getAuthToken());
         setApplications(a.applications || []);
+        setUsers([]); // No users API, leave empty.
       } catch { setErr("Failed to load admin data"); }
       setLoading(false);
     }
@@ -56,25 +54,7 @@ export default function AdminDashboard() {
         <div>{t("loading")}</div>
       ) : (
         <div>
-          <h3>Users</h3>
-          <table style={{ width: "100%", marginBottom: 24 }}>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Admin</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id}>
-                  <td>{u.name}</td>
-                  <td>{u.email}</td>
-                  <td>{u.is_admin ? "✔️" : ""}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {/* Users table removed: Not implemented in backend */}
           <h3>Certificate Applications</h3>
           <table style={{ width: "100%", marginBottom: 18 }}>
             <thead>

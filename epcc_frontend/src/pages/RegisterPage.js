@@ -27,13 +27,19 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      const resp = await apiRequest("/auth/register", "POST", {
-        name,
+      // Backend: use /register, payload { full_name, email, password }
+      const resp = await apiRequest("/register", "POST", {
+        full_name: name,
         email,
         password,
       });
-      saveAuthToken(resp.access_token);
-      navigate("/");
+      // If backend doesn't return JWT, redirect to login, else proceed
+      if (resp?.access_token) {
+        saveAuthToken(resp.access_token);
+        navigate("/");
+      } else {
+        navigate("/login");
+      }
     } catch (e) {
       setError(t("general_error"));
     }

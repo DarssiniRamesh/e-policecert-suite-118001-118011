@@ -32,31 +32,7 @@ export default function Downloads() {
 
   async function handleDownload(id, filename) {
     setDlId(id);
-    try {
-      const token = getAuthToken();
-      const resp = await fetch(
-        process.env.REACT_APP_EPCC_BACKEND_URL
-          ? process.env.REACT_APP_EPCC_BACKEND_URL + `/certificates/${id}/download`
-          : `http://localhost:3001/certificates/${id}/download`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!resp.ok) throw new Error("Failed to download");
-      const blob = await resp.blob();
-      const href = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = href;
-      link.setAttribute("download", filename || "certificate.pdf");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(href);
-    } catch {
-      setErr("Download failed.");
-    }
+    setErr("Download not available. Please contact the police station for your issued certificate.");
     setDlId(null);
   }
 
@@ -71,20 +47,11 @@ export default function Downloads() {
         <ul>
           {certs.map((c) => (
             <li key={c.id} style={{ marginBottom: 12 }}>
-              {c.file_name || `Certificate #${c.id}`}{" "}
-              <button
-                className="theme-toggle"
-                style={{
-                  marginLeft: 8,
-                  fontSize: 14,
-                  padding: "4px 18px",
-                  minWidth: 88,
-                }}
-                onClick={() => handleDownload(c.id, c.file_name)}
-                disabled={dlId === c.id}
-              >
-                {dlId === c.id ? t("loading") : t("download_certificate")}
-              </button>
+              {c.file_name || `Certificate #${c.id}`}
+              {/* Download not available since endpoint missing in backend */}
+              <span style={{ marginLeft: 10, color: "#1976D2" }}>
+                (In person collection only)
+              </span>
             </li>
           ))}
         </ul>

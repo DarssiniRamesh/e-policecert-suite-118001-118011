@@ -21,8 +21,26 @@ export default function LoginPage() {
     }
     setLoading(true);
     try {
-      const resp = await apiRequest("/auth/login", "POST", { email, password });
-      saveAuthToken(resp.access_token);
+      // Backend login: POST /token, OAuth2 password: username, password as form-data
+      const formData = new URLSearchParams();
+      formData.append("username", email);
+      formData.append("password", password);
+
+      const resp = await fetch(
+        "https://vscode-internal-74-beta.beta01.cloud.kavia.ai:3001/token",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: formData.toString(),
+        }
+      );
+      if (!resp.ok) {
+        throw await resp.json();
+      }
+      const data = await resp.json();
+      saveAuthToken(data.access_token);
       navigate("/");
     } catch (e) {
       setError(
