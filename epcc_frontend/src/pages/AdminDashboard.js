@@ -147,6 +147,58 @@ export default function AdminDashboard() {
     { key: "review", label: "Review", width: 96 }
   ];
 
+  // Audit log state for admin visibility; fetched on mount
+  const [auditLog, setAuditLog] = useState([]);
+  const [auditLoading, setAuditLoading] = useState(false);
+
+  useEffect(() => {
+    async function fetchAudit() {
+      setAuditLoading(true);
+      try {
+        let resp = [];
+        try {
+          // Try known auditlog endpoints
+          resp = await apiRequest("/admin/auditlog", "GET", null, getAuthToken());
+          setAuditLog(Array.isArray(resp) ? resp : (resp.auditlog || []));
+        } catch {
+          setAuditLog([]);
+        }
+      } catch { setAuditLog([]); }
+      setAuditLoading(false);
+    }
+    fetchAudit();
+    // eslint-disable-next-line
+  }, [reload]);
+
+  // Download button for documents (admin) — fetches file from backend and triggers download
+  async function handleDownloadDocument(docId, fileName) {
+    try {
+      const token = getAuthToken();
+      const resp = await fetch(
+        `https://vscode-internal-74-beta.beta01.cloud.kavia.ai:3001/documents/download/${encodeURIComponent(fileName)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      const blob = await resp.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName || "document";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {
+      alert("Failed to download document.");
+    }
+  }
+
+  // Helper for review modal: fetch document and certificate info for application
+  // Optionally, expects modalApp.documents and modalApp.certificates from backend
+  // For now, use placeholder/fake logic
+
   // Render
   return (
     <div
@@ -377,7 +429,7 @@ export default function AdminDashboard() {
           >
             <div style={{
               background: "#fff",
-              minWidth: 290, maxWidth: 450,
+              minWidth: 290, maxWidth: 490,
               padding: 24,
               borderRadius: 15,
               boxShadow: "0 12px 36px #19356442"
@@ -414,7 +466,48 @@ export default function AdminDashboard() {
                     : JSON.stringify(modalApp.info || "-")}
                 </span>
               </div>
-              <div style={{ marginTop: 15, display: "flex", gap: 8 }}>
+
+              {/* Document download / audit section */}
+              <div style={{ marginTop: 12, marginBottom: 8, borderTop: "1px solid #e3e8ef", paddingTop: 8 }}>
+                <b>Documents Submitted/Audited:</b><br />
+                <span style={{ fontSize: 13, color: "#555" }}>
+                  {/* Placeholder: link to download (if API/filename known), else N/A */}
+                  {(modalApp.documents && Array.isArray(modalApp.documents) && modalApp.documents.length > 0) ? (
+                    modalApp.documents.map(doc =>
+                      <span key={doc.id || doc.file_name} style={{ marginRight: 9 }}>
+                        <button style={{
+                          background: colors.blue,
+                          color: "#fff",
+                          border: 0, borderRadius: 6, padding: "2px 8px", fontSize: 14, cursor: "pointer"
+                        }}
+                          onClick={() => handleDownloadDocument(doc.id, doc.file_name)}
+                        >Download</button> {doc.file_name}
+                      </span>
+                    )
+                  ) : (
+                    <span style={{ color: "#888" }}>No documents submitted/found.</span>
+                  )}
+                </span>
+              </div>
+
+              {/* Certificate issued download section */}
+              <div style={{ marginBottom: 8 }}>
+                <b>Certificate:</b>{" "}
+                {(modalApp.status === "issued" && modalApp.certificate_file) ? (
+                  <button style={{
+                    background: colors.navy, color: "#fff",
+                    border: 0, borderRadius: 6, padding: "3px 12px", fontWeight: 600, fontSize: 15
+                  }}
+                    onClick={() => handleDownloadDocument("cert", modalApp.certificate_file)}
+                  >
+                    Download Certificate
+                  </button>
+                ) : (
+                  <span style={{ color: "#888" }}>Not issued</span>
+                )}
+              </div>
+
+              <div style={{ marginTop: 15, display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {(modalApp.status === "pending") && (
                   <>
                     <button
@@ -487,6 +580,54 @@ export default function AdminDashboard() {
         }}>
           Officers: Bulk export for audit/reporting (CSV). All actions are role-protected.
         </div>
+
+        {/* AUDIT LOG TABLE (if any) */}
+        <section style={{
+          marginTop: 40,
+          background: "#f9fafc",
+          borderRadius: 14,
+          padding: 18,
+          border: "1.5px solid #e3e8ef"
+        }}>
+          <div style={{
+            color: "#1E2A38", fontWeight: 700, fontSize: 18, marginBottom: 8
+          }}>Document/Certificate Audit Log</div>
+          {auditLoading ? (
+            <div style={{ color: "#1976D2", fontWeight: 600 }}>Loading logs...</div>
+          ) : auditLog.length === 0 ? (
+            <div style={{ color: "#888" }}>No audit log entries found.</div>
+          ) : (
+            <table style={{ width: "100%", fontSize: 14, marginTop: 6 }}>
+              <thead>
+                <tr style={{
+                  background: "#e3e8ef", color: "#1E2A38", fontWeight: 700
+                }}>
+                  <th style={{ padding: "5px" }}>Time</th>
+                  <th style={{ padding: "5px" }}>Actor</th>
+                  <th style={{ padding: "5px" }}>Action</th>
+                  <th style={{ padding: "5px" }}>Target</th>
+                  <th style={{ padding: "5px" }}>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {auditLog.map((l, idx) => (
+                  <tr key={l.id || idx}
+                    style={{ background: idx % 2 === 0 ? "#fff" : "#f9fafc" }}>
+                    <td style={{ padding: "5px" }}>
+                      {l.timestamp ? new Date(l.timestamp).toLocaleString() : ""}
+                    </td>
+                    <td style={{ padding: "5px" }}>
+                      {l.actor_email || l.actor_name || "-"}
+                    </td>
+                    <td style={{ padding: "5px" }}>{l.action}</td>
+                    <td style={{ padding: "5px" }}>{l.target}</td>
+                    <td style={{ padding: "5px" }}>{l.details || "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
       </section>
     </div>
   );
