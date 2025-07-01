@@ -16,6 +16,7 @@ export default function Sidebar({ open, closeSidebar, handleLogout }) {
     { path: "/", label: t("dashboard"), icon: "🏠" },
     { path: "/applications", label: t("certificate_history"), icon: "📄" },
     { path: "/apply", label: t("apply_certificate"), icon: "📝" },
+    { path: "/verify", label: "Verify Certificate", icon: "🔎" },
     { path: "/notifications", label: t("notifications"), icon: "🔔" },
     { path: "/upload", label: t("upload_documents"), icon: "📎" },
     { path: "/downloads", label: t("download_certificate"), icon: "⬇️" },

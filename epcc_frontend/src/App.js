@@ -17,6 +17,7 @@ import DocumentUpload from "./pages/DocumentUpload";
 import Downloads from "./pages/Downloads";
 import NotFoundPage from "./pages/NotFoundPage";
 import UserManagement from "./pages/UserManagement";
+import CertificateVerificationPage from "./pages/CertificateVerificationPage";
 
 function PrivateRoute({ children }) {
   const token = getAuthToken();
@@ -135,6 +136,10 @@ function App() {
             }
           />
           <Route path="*" element={<NotFoundPage />} />
+          <Route
+            path="/verify"
+            element={<CertificateVerificationPage />}
+          />
         </Routes>
       </main>
     </div>
