@@ -3,6 +3,7 @@ import "./App.css";
 import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
 import { useLang } from "./i18n";
 import { getAuthToken, removeAuthToken } from "./api";
+import { getUserRoleInfo, fetchUserRoleInfo } from "./auth";
 
 import TopNavBar from "./components/TopNavBar";
 import Sidebar from "./components/Sidebar";
@@ -25,11 +26,40 @@ function PrivateRoute({ children }) {
 }
 
 function AdminRoute({ children }) {
-  // TODO: fetch user and check is_admin from backend and context
   const token = getAuthToken();
-  // // ideally fetch user profile and see is_admin
+  const [checking, setChecking] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    async function checkRole() {
+      if (!token) {
+        if (mounted) setIsAdmin(false);
+        setChecking(false);
+        return;
+      }
+      const { isAdmin: adminDecoded } = getUserRoleInfo();
+      if (adminDecoded) {
+        setIsAdmin(true);
+        setChecking(false);
+        return;
+      }
+      // fallback to API check
+      try {
+        const { isAdmin: adminApi } = await fetchUserRoleInfo(true);
+        if (mounted) setIsAdmin(adminApi);
+      } catch {
+        if (mounted) setIsAdmin(false);
+      }
+      if (mounted) setChecking(false);
+    }
+    checkRole();
+    return () => { mounted = false };
+  }, [token]);
+
   if (!token) return <Navigate to="/login" replace />;
-  // just for demo always show:
+  if (checking) return <div style={{ padding: 60, textAlign: "center" }}>Checking permissions…</div>;
+  if (!isAdmin) return <Navigate to="/" replace />;
   return children;
 }
 

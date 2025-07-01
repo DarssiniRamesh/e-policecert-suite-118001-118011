@@ -1,16 +1,14 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useLang } from "../i18n";
-import { getAuthToken } from "../api";
+import { getUserRoleInfo } from "../auth";
 
 // PUBLIC_INTERFACE
 export default function Sidebar({ open, closeSidebar, handleLogout }) {
   const { t } = useLang();
   const location = useLocation();
   const token = getAuthToken();
-
-  // TODO: replace with actual user/admin check
-  const isAdmin = token != null; // in real app, fetch user and check isAdmin
+  const { isAdmin } = getUserRoleInfo();
 
   const links = [
     { path: "/", label: t("dashboard"), icon: "🏠" },
@@ -23,7 +21,7 @@ export default function Sidebar({ open, closeSidebar, handleLogout }) {
     ...(isAdmin
       ? [
           { path: "/admin", label: t("adminDashboard"), icon: "🛠️" },
-          { path: "/admin/users", label: "User Management", icon: "👥" }
+          { path: "/admin/users", label: "User Management", icon: "👥" },
         ]
       : []),
   ];
