@@ -12,6 +12,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // PUBLIC_INTERFACE
+  // Login handler: POST /token, expects username/password as application/x-www-form-urlencoded
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -21,7 +23,7 @@ export default function LoginPage() {
     }
     setLoading(true);
     try {
-      // Backend login: POST /token, OAuth2 password: username, password as form-data
+      // Prepare login form data as x-www-form-urlencoded per OAuth2 spec
       const formData = new URLSearchParams();
       formData.append("username", email);
       formData.append("password", password);
@@ -36,15 +38,25 @@ export default function LoginPage() {
           body: formData.toString(),
         }
       );
-      if (!resp.ok) {
-        throw await resp.json();
+      let data;
+      // Attempt to read JSON response regardless of ok/error for detailed error information
+      try {
+        data = await resp.json();
+      } catch {
+        data = {};
       }
-      const data = await resp.json();
-      saveAuthToken(data.access_token);
-      navigate("/");
+      if (!resp.ok) {
+        throw data;
+      }
+      if (data?.access_token) {
+        saveAuthToken(data.access_token);
+        navigate("/");
+      } else {
+        setError(t("invalid_credentials"));
+      }
     } catch (e) {
       setError(
-        e?.error === "INVALID_CREDENTIALS"
+        (e && e.error === "INVALID_CREDENTIALS")
           ? t("invalid_credentials")
           : t("general_error")
       );

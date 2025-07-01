@@ -14,6 +14,8 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // PUBLIC_INTERFACE
+  // Registration handler: POST /register, expects { full_name, email, password }
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -27,14 +29,14 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      // Backend: use /register, payload { full_name, email, password }
+      // Backend endpoint: POST /register, expects { full_name, email, password }
       const resp = await apiRequest("/register", "POST", {
         full_name: name,
         email,
         password,
       });
-      // If backend doesn't return JWT, redirect to login, else proceed
-      if (resp?.access_token) {
+      // Backend may or may not return an access_token; if not, ask user to login.
+      if (resp && resp.access_token) {
         saveAuthToken(resp.access_token);
         navigate("/");
       } else {
