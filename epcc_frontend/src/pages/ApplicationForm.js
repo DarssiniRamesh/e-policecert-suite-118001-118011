@@ -21,11 +21,19 @@ export default function ApplicationForm() {
     }
     setLoading(true);
     try {
-      // Backend expects { details: { type, info } }
+      // Backend expects { details: string } (concatenation of type and info)
+      const details =
+        type && info
+          ? `Type: ${type}. Info: ${info}`
+          : type
+          ? `Type: ${type}`
+          : info
+          ? `Info: ${info}`
+          : "";
       await apiRequest(
         "/applications",
         "POST",
-        { details: { type, info } },
+        { details },
         getAuthToken()
       );
       setSuccess("Application submitted!");
