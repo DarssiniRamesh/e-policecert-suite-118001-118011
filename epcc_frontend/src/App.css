@@ -1,13 +1,18 @@
 /* CSS Variables for Theme Management */
 :root {
   /* Light theme colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
-  --text-primary: #282c34;
-  --text-secondary: #61dafb;
-  --border-color: #e9ecef;
-  --button-bg: #007bff;
-  --button-text: #ffffff;
+  --epcc-navy: #1E2A38;
+  --epcc-blue: #1976D2;
+  --epcc-blue-accent: #1E88E5;
+  --epcc-green: #43A047;
+  --epcc-gray: #e3e8ef;
+  --bg-primary: #f9fafc;
+  --bg-secondary: #fff;
+  --text-primary: #1E2A38;
+  --text-secondary: #1976D2;
+  --border-color: #e3e8ef;
+  --button-bg: #1976D2;
+  --button-text: #fff;
 }
 
 [data-theme="dark"] {
