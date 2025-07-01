@@ -1,119 +1,158 @@
-# Extracted RFP Requirements for E-Police Certificate System 
-*Based on RFP/FJI10-017-2021 for Vanuatu Police Force e-PCC Web & Mobile Applications*
+# EPCC (E-Police Certificate) UI/UX, Dashboard, Admin, Analytics, and Theme Requirements – Extracted from RFP
+
+_This document summarizes all relevant user interface, user experience, dashboard features, admin capabilities, analytics, and visual theming requirements from the 2021 RFP for the Vanuatu Police Force E-Police Certificate project. The aim is to provide clear design and feature constraints for the frontend/admin and user dashboard redesign phase._
 
 ---
 
-## 1. Context and System Scope
+## 1. Platform Scope & Intended Users
 
-The E-Police Certificate (e-PCC) solution is intended to expedite and digitize the process of Police Clearance Certificates (PCC) for Vanuatu residents—especially seasonal workers required to provide this documentation to employers abroad. The system addresses pain points in the current manual process, such as high cost, significant travel, single-location access, and bureaucracy.
+### Web and Mobile
+- The system must be delivered as both a web-based application, usable via modern browsers (including on low-powered and feature phones), and an Android smartphone application.
+- Both platforms should provide equivalent core functionality.
+- Platform to enable digital delivery and fully online processing for Police Clearance Certificate (PCC) applications.
 
-The e-PCC project requires both a **web-based portal** and an **Android smartphone application**. This document focuses on the UI/UX, functional, dashboard, and role-based requirements derived from the RFP for system design.
-
----
-
-## 2. Functional Requirements (from RFP)
-
-### 2.1 For All Users (Applicants)
-- **Web-based Application Access:** The system must provide a simple web interface, usable on modern browsers and low-powered mobile devices (including feature phones with browsers).
-- **PCC Application Submission:** Users can apply for their Police Clearance Certificate (PCC) online.
-- **Document Upload:** Users must be able to upload required documents as part of their PCC application, eliminating the need for in-person visits.
-- **24/7 Availability:** Platform is accessible at any time from home or elsewhere with internet.
-- **Multilingual Content:** Application content should be available in both Bislama (default) and English.
-- **e-PCC Delivery:** Applicants can request the approved, digitally signed PDF e-PCC be sent via email. Optionally, it can also be sent directly to an Agent/Employer.
-- **Progress/View:** Users can track the status of their application with clear updates (through notifications or dashboard indicators).
-- **Fee Payment Integration:** Users can pay the prevailing PCC fees online, ideally integrated with local bank mobile channels, mobile money, or other e-payment services.
-- **No Additional Charges:** Users pay only the established PCC fees; no hidden or extra platform charges.
-- **Notifications:** Users receive status updates throughout the certificate application lifecycle.
-
-### 2.2 For Administrators (VPF, OGCIO, Officers) 
-- **Admin Dashboard:** Admins can view all user applications, uploaded documents, and system analytics/data. (Includes ability to search, filter by status, view detailed records, etc.)
-- **User List and Management:** Admins/Officers see a list of all users, certificates, and related data for verification and processing actions.
-- **Certificate Verification and Processing:** Admins can review, verify, approve, or reject PCC applications and uploaded documents.
-- **Direct Communication:** Admins can issue or verify certificates, sending approved certificates directly to users or agencies.
-- **Audit Trail & Analytics:** The platform includes a digital document manager for the VPF to securely store, reuse, and analyze user and certificate data (for efficiency, integrity, and reporting).
-- **System Maintenance:** Admins/technical users are responsible for maintenance, documentation, and handover as part of system operations.
+### Core Stakeholders/Roles
+- **Applicants/Regular Users:** Vanuatu residents using the service to request, pay for, and receive police certificates, especially for overseas employment.
+- **Administrators/Officers:** Staff from Vanuatu Police Force (VPF), OGCIO, Department of Finance and Treasury (DoFT), and other trusted roles for administrative access, processing, and oversight.
+- **External Recipients:** Agents/employers and immigration officers who may be direct recipients of certificates via digital delivery.
 
 ---
 
-## 3. Roles and Access
+## 2. Functional & UX Requirements
 
-### 3.1 Role Types
-- **Regular User (Applicant):**
-  - Can register, login, apply, upload documents, pay, track status, ask for digital delivery.
-  - Sees a dashboard focused on application analytics, recent activity, notifications, and certificate/download status.
+### For All Users (Applicants)
+- **Dashboard Access & Visibility**
+  - Users must have access to a personal dashboard after authentication, presenting an overview of their certificate applications, statuses, recent activity, and notifications.
+  - Submission and status tracking for new PCC applications must be available at any time (“24/7 Availability”).
+  - Ability to view/download digital copies of issued e-PCC, if eligible.
 
-- **Administrator/Officer:**
-  - Sees all users and all applications, including audit trail and analytics.
-  - Can approve/reject/verifying applications, view and manage uploads, handle direct e-mail/PDF delivery, and provide audit/reporting oversight.
-  - Can manage user roles and system configuration (as needed by VPF).
+- **Application Submission Workflow**
+  - Online PCC application through a streamlined web/mobile interface.
+  - Users must be able to upload required supporting documents electronically.
+  - The system must allow applicants to supply delivery preferences (e.g., PDF via email, direct to agent).
+  - Clear feedback, validation, and stepwise progress within the submission process.
 
----
+- **Notifications & Status Updates**
+  - Real-time or near-real-time notification of application status changes (pending, approved, rejected, issued).
+  - Visual indicators or notification center within dashboard.
 
-## 4. Dashboard Features
+- **Multilingual Interface**
+  - Full bilingual support required; Bislama (default) and English must be available throughout the interface.
+  - Users must be able to toggle languages via a clearly visible control in the UI (navbar/side-menu preferred).
 
-### 4.1 Admin Dashboard
-- **Full User List:** All registered users are visible, filterable, and actionable from the admin panel.
-- **Applications Overview:** Detailed and summary views of all PCC applications (pending, approved, rejected, etc.).
-- **Actions:** Ability to approve/reject/verify submissions, review uploaded documents, send notifications, and issue e-PCCs.
-- **Analytics:** System should visualize data/metrics like number of applications, approval/rejection rates, in-progress vs. completed applications, payment stats, and other key performance indicators useful to VPF and OGCIO.
-- **Audit Trails:** Ability to review a chronological log of certificate processing, user actions, and admin interventions.
+- **Fee Payment Integration**
+  - Secure, digital payment flows for PCC fees: integration with local banks’ mobile channels, mobile money, or e-wallet services.
+  - No hidden or “platform” fees; only official government PCC fees should be communicated at all stages of the user journey.
+  - Visual clarity around amounts due and payment confirmation.
 
-### 4.2 User Dashboard
-- **Summary/Analytics:** Displays counts of submitted applications, current statuses (e.g., pending, approved), and quick-glance activity history.
-- **Application Statuses:** Recent activity list/log (e.g., submissions, uploads, notification events, certificate issued, etc.)
-- **Document Management:** List and status of uploaded documents per application.
-- **Certificate Details:** View/download links for certificates, if eligible, and delivery statuses.
-- **Notifications:** All status and administrative updates appear in the dashboard or a notification panel.
+- **Document & Data Management**
+  - Users have access to their history of applications and uploaded documents, with each file linked to the respective application.
+  - Download links for all documents after successful submission or issuing.
 
----
-
-## 5. Analytics & Data
-
-- **Dashboard Charts/Stats:** Both admin and users benefit from graphical or tabular representations of their activities (totals, monthly trends, etc.).
-- **Admin Analytics:** System-wide statistics for reporting to management or government (volumes, types, payment stats, application durations, etc.).
-- **Data Storage:** Digital document management for records retention, reuse, and analysis.
+- **Accessibility & Device Compatibility**
+  - Responsive layout supporting desktop, tablet, and mobile devices, including low-end smartphones and feature phones (web browser).
+  - Font sizes, contrasts, and color use must ensure readability for all user groups.
 
 ---
 
-## 6. UI/UX and Visual/Theme Guidelines
+### For Administrators & Officers
 
-### 6.1 General
-- **Simple, Modern, and Professional UI:** Visual design must inspire trust with a professional, institutional look and feel.
-- **Navy Blue Theme:** The primary branding should use navy blue, with clean, minimal accents and layouts suited for police/government context.
-- **Accessibility:** The design must be responsive and function well across desktop and low-end mobile devices.
-- **Color Accessibility:** Good contrast and readable fonts.
-- **Clear Layout:** Use of clear top navigation and sidebars as needed; data-rich dashboard views for both roles.
-- **Minimalistic Sidebar:** An improved sidebar with logically grouped navigation relevant to the user role.
-- **Language Toggle:** Frontend should provide a visible switch for Bislama and English.
+- **Admin Dashboard**
+  - Comprehensive dashboard to view, filter, and search all PCC applications across users.
+  - Summary tables, charts, and analytics for key system metrics:
+    - Number of applications in various statuses (pending, approved, etc.)
+    - Historical trends (e.g., by month)
+    - Payment statistics (total collected, payment methods utilized)
+    - System usage and user activity indicators
 
-### 6.2 Color & Theme (from RFP and container configs)
-- **Primary:** Navy Blue (Suggested hex: #1E2A38 to #1976D2 or similar)
-- **Secondary/Accents:** Use soft/light greys, white backgrounds, with blue/green action colors if needed.
-- **User-Facing:** Icons and indicators should be minimal, not cartoonish, and in a style suitable for an official government portal.
+- **Full Access to User Data & Applications**
+  - Listings for all user accounts and applications (including ability to drill down into any specific record).
+  - Viewing of all uploaded documentation associated with an application.
+  - Ability to approve, reject, or otherwise process applications, including issuing or revoking certificates.
 
----
+- **Digital Certificate Issuance & Delivery**
+  - Admins must be able to issue digitally signed PDF e-PCCs and arrange direct digital delivery to users and/or 3rd parties (e.g., agents, employers).
 
-## 7. Additional Notes
+- **System Management Tools**
+  - Capabilities for managing user roles, overall system configuration, and audit controls.
+  - Audit log feature for tracking significant actions (application editing, approval/rejection, user management).
+  - Technical documentation and admin training materials to be made available as part of the software delivery.
 
-- **Direct PDF Delivery Options:** Delivery methods for the signed e-PCC include user email and sending direct to agent/employer.
-- **Integration with Payment Services:** UI must accommodate or guide users through digital payment flows (via mobile banking or eMoney services).
-- **No Hidden Charges:** Transparent UI around payments.
-- **Support & Handover:** Documentation and staff/admin training must accompany the software.
-
----
-
-## 8. Requirements Checklist (for Design/Dev Reference)
-- [x] Web dashboard(s) for user and admin, platform-appropriate and device responsive
-- [x] Clean navy blue (police/professional) color theme across all visual components
-- [x] Separate role-based dashboards: analytics-rich for users, full control for admins
-- [x] Notification functionality for status and system updates
-- [x] Document upload and management features included in application and dashboard flows
-- [x] Direct download and/or email/PDF certificate delivery
-- [x] Integrated digital payment support
-- [x] Language switcher prominently available (Bislama/English)
-- [x] Visual analytics and status indicators for both user and admin dashboards
+- **Security and Data Integrity**
+  - Collaboration with VPF and OGCIO for hosting, security hardening, and compliance.
+  - Secure handling of digital documents, user data, and application processing.
 
 ---
 
-_Last updated: Extracted from 2021 RFP for e-PCC (Vanuatu Police Force) by UNDP/UNCDF_
+## 3. Analytics Requirements
+
+- **Visual Analytics**
+  - Graphical or tabular representations of both user and system-wide metrics (applications per status, payment volumes, application durations, monthly or regional trend charts).
+- **Reporting and Export**
+  - Admin dashboards must support data export for management or regulatory reporting.
+
+---
+
+## 4. Theme, Branding, and Visual Design Guidelines
+
+- **General Visual Style**
+  - Simple, modern, clean, and professional user interface emphasizing trust and credibility for a government service.
+  - Branding must center around a navy blue color scheme, with possible hex colors in the range #1E2A38 to #1976D2.
+  - Minimal cartoonish icons—visuals should be official and institutional rather than playful.
+
+- **Color & Layout**
+  - Primary: Navy Blue (for headers/nav/sidebar), with appropriate accent and link colors (e.g., blue, green for positive actions).
+  - Secondary: Light greys and whites for clean content areas, ensuring high contrast and legibility.
+  - All content, buttons, and form controls must meet WCAG accessibility standards.
+
+- **Layout and Navigation**
+  - Top navigation bar for major sections (dashboard, applications, notifications, etc.).
+  - Sidebar (on desktop or large tablet) for quick navigation relevant to user role; mobile-friendly collapsible menu.
+  - Dashboard landing pages for both users and admins; visually rich with analytics and immediate actions.
+
+- **Language Toggle**
+  - Prominent and quick-to-access UI element for switching between Bislama and English.
+
+- **Minimalistic Sidebar/Menu**
+  - Side navigation should be grouped logically by workflow/use case; avoid clutter.
+
+---
+
+## 5. Other Technical and User-Support Requirements
+
+- **Digital Delivery Options**
+  - UI must allow users/admins to select delivery options for certificates, including secure email or direct submission to agent/employer.
+- **Payment Transparency**
+  - All payment flows, including external digital payment integrations, must clearly display the official fee and that no additional platform charges exist.
+- **Support, Training, and Handover**
+  - Technical manuals for admin/support and end-user guides with step-by-step visuals.
+  - Staff handover and training to be considered as part of rollout.
+
+---
+
+## 6. Deliverables From RFP
+
+_Note: Not all are UI, but they constrain documentation and UX:_
+- ePCC web and Android app prototypes discussed and agreed with OGCIO/VPF.
+- Complete documentation, user/admin training, and awareness guides with visuals.
+- Bi-weekly reporting structure (feedback loops).
+- Security, user privacy, and compliance requirements to be met.
+
+---
+
+## 7. Summary Checklist for Frontend & Admin Dashboard
+
+- [x] Modern navy blue-based theme.
+- [x] Responsive, accessible layouts for user and admin dashboards.
+- [x] User dashboard: application status, analytics, activity, notifications.
+- [x] Admin dashboard: all users, all applications, filter/search, analytics, audit trails.
+- [x] Integration with mobile money/bank payment flows—no extra charges.
+- [x] Digital upload and delivery (PDF/email/agent).
+- [x] Multilingual/Bislama & English support.
+- [x] Prominent language toggle, clear navigation.
+- [x] Admin/user documentation and UAT/feedback cycles included.
+
+---
+
+_Last updated: Extracted from RFP/FJI10-017-2021 Vanuatu Police Force ePCC web/mobile application (UNDP/UNCDF, 2021)._
 
