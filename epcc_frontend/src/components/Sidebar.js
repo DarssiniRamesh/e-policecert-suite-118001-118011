@@ -20,7 +20,10 @@ export default function Sidebar({ open, closeSidebar, handleLogout }) {
     { path: "/upload", label: t("upload_documents"), icon: "📎" },
     { path: "/downloads", label: t("download_certificate"), icon: "⬇️" },
     ...(isAdmin
-      ? [{ path: "/admin", label: t("adminDashboard"), icon: "🛠️" }]
+      ? [
+          { path: "/admin", label: t("adminDashboard"), icon: "🛠️" },
+          { path: "/admin/users", label: "User Management", icon: "👥" }
+        ]
       : []),
   ];
 

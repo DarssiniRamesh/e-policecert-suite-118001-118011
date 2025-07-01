@@ -16,6 +16,7 @@ import Notifications from "./pages/Notifications";
 import DocumentUpload from "./pages/DocumentUpload";
 import Downloads from "./pages/Downloads";
 import NotFoundPage from "./pages/NotFoundPage";
+import UserManagement from "./pages/UserManagement";
 
 function PrivateRoute({ children }) {
   const token = getAuthToken();
@@ -98,6 +99,14 @@ function App() {
             element={
               <AdminRoute>
                 <AdminDashboard />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <AdminRoute>
+                <UserManagement />
               </AdminRoute>
             }
           />
