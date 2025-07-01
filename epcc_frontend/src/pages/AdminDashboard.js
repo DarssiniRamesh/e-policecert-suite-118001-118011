@@ -37,6 +37,13 @@ export default function AdminDashboard() {
     total: 0, pending: 0, approved: 0, rejected: 0, issued: 0,
   });
 
+  // Certificate statistics state
+  const [certStats, setCertStats] = useState({
+    total: 0,
+    lastMonth: 0,
+    usersWithIssued: 0,
+  });
+
   const colors = {
     navy: "#1E2A38",
     blue: "#1976D2",
@@ -58,6 +65,7 @@ export default function AdminDashboard() {
       setErr("");
       setActionMsg("");
       try {
+        // Fetch admin applications
         const resp = await apiRequest("/admin/applications", "GET", null, getAuthToken());
         const apps = Array.isArray(resp) ? resp : (resp.applications || []);
         setApplications(apps);
@@ -70,10 +78,37 @@ export default function AdminDashboard() {
           else agg[st] = 1;
         });
         setStats(agg);
+
+        // Fetch certificates for admin-level certificate analytics/statistics
+        try {
+          const certResp = await apiRequest("/certificates", "GET", null, getAuthToken());
+          let certifications = [];
+          if (Array.isArray(certResp)) certifications = certResp;
+          else if (certResp && Array.isArray(certResp.certificates)) certifications = certResp.certificates;
+          // Count total, issued in last month, distinct users w/certs
+          let totalCerts = certifications.length;
+          let lastMonth = 0;
+          let userSet = new Set();
+          let now = new Date();
+          certifications.forEach(cert => {
+            if (cert.issue_date) {
+              let certDate = new Date(cert.issue_date);
+              let monthDiff =
+                (now.getFullYear() - certDate.getFullYear()) * 12 +
+                (now.getMonth() - certDate.getMonth());
+              if (monthDiff === 0) lastMonth++;
+            }
+            if (cert.user_id || cert.user_email) userSet.add(cert.user_id || cert.user_email);
+          });
+          setCertStats({ total: totalCerts, lastMonth, usersWithIssued: userSet.size });
+        } catch {
+          setCertStats({ total: 0, lastMonth: 0, usersWithIssued: 0 });
+        }
       } catch (e) {
         setErr("Failed to load administrative data.");
         setApplications([]);
         setStats({ total: 0, pending: 0, approved: 0, rejected: 0, issued: 0 });
+        setCertStats({ total: 0, lastMonth: 0, usersWithIssued: 0 });
       }
       setLoading(false);
     }
@@ -302,15 +337,55 @@ export default function AdminDashboard() {
           color={colors.navy}
           bg={colors.gray}
         />
+        {/* Certificate global analytics */}
+        <AdminAnalyticsWidget
+          label="Certificates Issued"
+          value={certStats.total}
+          icon="🎓"
+          color={colors.navy}
+          bg={colors.light}
+        />
+        <AdminAnalyticsWidget
+          label="Last Month"
+          value={certStats.lastMonth}
+          icon="📆"
+          color={colors.navy}
+          bg={colors.blueAccent}
+        />
+        <AdminAnalyticsWidget
+          label="Unique Holders"
+          value={certStats.usersWithIssued}
+          icon="👥"
+          color="#fff"
+          bg={colors.green}
+        />
       </div>
-      {/* ANALYTICS CHARTS */}
+      {/* Additional User Activity Summary */}
       <div style={{
         display: "flex",
-        gap: 40,
         flexWrap: "wrap",
-        marginBottom: 24,
-        alignItems: "center"
+        gap: 22,
+        margin: "-5px 0 26px 0",
+        alignItems: "flex-start"
       }}>
+        <div style={{
+          background: "#fff",
+          borderRadius: 13,
+          padding: "18px 21px 14px 21px",
+          border: "1.5px solid #e3e8ef",
+          minWidth: 232,
+          maxWidth: 340,
+        }}>
+          <div style={{
+            color: colors.navy,
+            fontWeight: 600,
+            fontSize: 18,
+            marginBottom: 7
+          }}>
+            Recent User Activity
+          </div>
+          <RecentUsersWidget apps={applications} />
+        </div>
         <div style={{
           background: "#fff",
           borderRadius: 13,
@@ -532,6 +607,72 @@ export default function AdminDashboard() {
         )}
       </div>
       {/* (Further audit log, modals, etc. could be placed below...) */}
+    </div>
+  );
+}
+
+// Widget: compact recent users list for analytics in admin dashboard
+function RecentUsersWidget({ apps }) {
+  // Show up to 6 latest users with recent application, status, and type.
+  if (!Array.isArray(apps) || apps.length === 0)
+    return <div style={{ color: "#888" }}>No user activity yet.</div>;
+  // Group by user email and show latest app per user.
+  const users = {};
+  // Sort most recent apps first
+  [...apps]
+    .sort((a, b) => {
+      const aTime = new Date(a.updated_at || a.created_at || 0).getTime();
+      const bTime = new Date(b.updated_at || b.created_at || 0).getTime();
+      return bTime - aTime;
+    })
+    .forEach((a) => {
+      const k = a.user_email || a.user_name || "unknown";
+      if (!users[k]) users[k] = a;
+    });
+  const recent = Object.values(users).slice(0, 6);
+  const badge = (txt, color) => (
+    <span style={{
+      background: color,
+      color: "#fff",
+      padding: "1.5px 8px",
+      borderRadius: 12,
+      fontWeight: 600,
+      fontSize: 12,
+      marginLeft: 6
+    }}>{txt}</span>
+  );
+  const statusCol = st => {
+    if (!st) return "#888";
+    switch (String(st).toLowerCase()) {
+      case "pending": return "#1976d2";
+      case "approved": return "#43a047";
+      case "rejected": return "#ce2b28";
+      case "issued": return "#1565c0";
+      default: return "#888";
+    }
+  };
+  return (
+    <div style={{ minWidth: 150 }}>
+      <table style={{ width: "100%", fontSize: 13, background: "none" }}>
+        <tbody>
+          {recent.map((a, idx) => (
+            <tr key={idx}>
+              <td style={{ fontWeight: 600, color: "#1e2a38" }}>
+                {a.user_email || a.user_name}
+              </td>
+              <td>
+                {badge(a.type, "#1976d222")}
+              </td>
+              <td>
+                {badge(a.status, statusCol(a.status))}
+              </td>
+              <td style={{ color: "#888", fontSize: 11 }}>
+                {a.created_at ? new Date(a.created_at).toLocaleDateString() : "-"}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
