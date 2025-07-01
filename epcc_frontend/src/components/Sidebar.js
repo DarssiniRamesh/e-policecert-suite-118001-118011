@@ -2,29 +2,37 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useLang } from "../i18n";
 import { getUserRoleInfo } from "../auth";
+import { getAuthToken } from "../api";
 
 // PUBLIC_INTERFACE
 export default function Sidebar({ open, closeSidebar, handleLogout }) {
   const { t } = useLang();
   const location = useLocation();
   const token = getAuthToken();
+  // Always evaluate fresh on render
   const { isAdmin } = getUserRoleInfo();
 
-  const links = [
-    { path: "/", label: t("dashboard"), icon: "🏠" },
-    { path: "/applications", label: t("certificate_history"), icon: "📄" },
-    { path: "/apply", label: t("apply_certificate"), icon: "📝" },
-    { path: "/verify", label: "Verify Certificate", icon: "🔎" },
-    { path: "/notifications", label: t("notifications"), icon: "🔔" },
-    { path: "/upload", label: t("upload_documents"), icon: "📎" },
-    { path: "/downloads", label: t("download_certificate"), icon: "⬇️" },
-    ...(isAdmin
-      ? [
-          { path: "/admin", label: t("adminDashboard"), icon: "🛠️" },
-          { path: "/admin/users", label: "User Management", icon: "👥" },
-        ]
-      : []),
+  // Only show links if user is authenticated
+  if (!token) return null;
+
+  // Each link can be marked for admin (so we can harden further)
+  const allLinks = [
+    { path: "/", label: t("dashboard"), icon: "🏠", admin: false },
+    { path: "/applications", label: t("certificate_history"), icon: "📄", admin: false },
+    { path: "/apply", label: t("apply_certificate"), icon: "📝", admin: false },
+    { path: "/verify", label: "Verify Certificate", icon: "🔎", admin: false },
+    { path: "/notifications", label: t("notifications"), icon: "🔔", admin: false },
+    { path: "/upload", label: t("upload_documents"), icon: "📎", admin: false },
+    { path: "/downloads", label: t("download_certificate"), icon: "⬇️", admin: false },
+    // Admin UI
+    { path: "/admin", label: t("adminDashboard"), icon: "🛠️", admin: true },
+    { path: "/admin/users", label: "User Management", icon: "👥", admin: true },
   ];
+
+  // Final filtered links for this user
+  const navLinks = allLinks.filter(l =>
+    !l.admin || (l.admin && isAdmin)
+  );
 
   return (
     <aside
@@ -50,12 +58,13 @@ export default function Sidebar({ open, closeSidebar, handleLogout }) {
         flexDirection: "column",
         gap: 2,
       }}>
-        {links.map((l) => {
+        {navLinks.map((l) => {
           const isActive = location.pathname === l.path;
           return (
             <Link
               to={l.path}
               key={l.path}
+              aria-label={l.label}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -96,6 +105,23 @@ export default function Sidebar({ open, closeSidebar, handleLogout }) {
             </Link>
           );
         })}
+        {/* Always show a logout shortcut at the end for authenticated users */}
+        <button
+          onClick={handleLogout}
+          style={{
+            margin: "30px 0 8px 8px",
+            background: "var(--epcc-danger)",
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            fontWeight: "bold",
+            padding: "11px 18px",
+            fontSize: 15,
+            cursor: "pointer"
+          }}
+        >
+          {t("logout")}
+        </button>
       </nav>
     </aside>
   );

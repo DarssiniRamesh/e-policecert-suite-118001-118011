@@ -14,6 +14,7 @@ import { getUserRoleInfo } from "../auth";
  * - UI protection: hidden for non-admins
  */
 export default function UserManagement() {
+  // All React Hooks must be called first, unconditionally at the top.
   const { t } = useLang();
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
@@ -29,7 +30,6 @@ export default function UserManagement() {
   const [modalUser, setModalUser] = useState(null);
   const [modalAction, setModalAction] = useState(""); // "promote"|"demote"|"activate"|"deactivate"|"" 
 
-  // Always call hooks before return
   useEffect(() => {
     async function fetchUsers() {
       setLoading(true); setErr(""); setActionMsg("");
@@ -59,7 +59,7 @@ export default function UserManagement() {
     setLogLoading(false);
   };
 
-  // Privilege check after all hooks
+  // Privilege check after all hooks (render fast for security)
   const { isAdmin } = getUserRoleInfo();
   if (!isAdmin)
     return (
