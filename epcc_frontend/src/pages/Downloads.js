@@ -4,7 +4,10 @@ import { apiRequest, getAuthToken } from "../api";
 
 // PUBLIC_INTERFACE
 /**
- * Certificate Downloads page: Fetches issued certificates but disables downloads since the endpoint doesn't exist in backend.
+ * Certificate Downloads page:
+ * - Fetches issued certificates from GET /certificates (requires Authorization: Bearer <token>)
+ * - Response: { certificates: [...] } or array
+ * - Download not supported (forwards user to in-person collection)
  */
 export default function Downloads() {
   const { t } = useLang();
@@ -17,19 +20,27 @@ export default function Downloads() {
       setLoading(true);
       setErr("");
       try {
-        const res = await apiRequest(
+        const resp = await apiRequest(
           "/certificates",
           "GET",
           null,
           getAuthToken()
         );
-        setCerts(res.certificates || []);
+        if (Array.isArray(resp)) {
+          setCerts(resp);
+        } else if (resp && Array.isArray(resp.certificates)) {
+          setCerts(resp.certificates);
+        } else {
+          setCerts([]);
+        }
       } catch {
         setErr("Failed to load certificates");
+        setCerts([]);
       }
       setLoading(false);
     }
     fetchCerts();
+    // eslint-disable-next-line
   }, []);
 
   return (
@@ -44,9 +55,9 @@ export default function Downloads() {
         <div>{t("loading")}</div>
       ) : certs.length > 0 ? (
         <ul>
-          {certs.map((c) => (
-            <li key={c.id} style={{ marginBottom: 12 }}>
-              {c.file_name || `Certificate #${c.id}`}
+          {certs.map((c, idx) => (
+            <li key={c.id || idx} style={{ marginBottom: 12 }}>
+              {c.file_name || c.name || `Certificate #${c.id || idx + 1}`}
               <span style={{ marginLeft: 10, color: "#1976D2", fontStyle: "italic" }}>
                 (In person collection only)
               </span>
