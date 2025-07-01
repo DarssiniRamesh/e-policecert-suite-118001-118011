@@ -3,9 +3,11 @@ import { useLang } from "../i18n";
 import { apiRequest, getAuthToken } from "../api";
 
 // PUBLIC_INTERFACE
+/**
+ * Admin dashboard: Approve/reject applications; user listing removed (not supported by backend).
+ */
 export default function AdminDashboard() {
   const { t } = useLang();
-  const [users, setUsers] = useState([]);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
@@ -17,11 +19,12 @@ export default function AdminDashboard() {
     async function fetchData() {
       setErr(""); setLoading(true);
       try {
-        // Remove /admin/users (not implemented); only fetch applications.
+        // Fetch only applications, admin/users is not implemented in backend:
         const a = await apiRequest("/admin/applications", "GET", null, getAuthToken());
         setApplications(a.applications || []);
-        setUsers([]); // No users API, leave empty.
-      } catch { setErr("Failed to load admin data"); }
+      } catch {
+        setErr("Failed to load admin data");
+      }
       setLoading(false);
     }
     fetchData();
