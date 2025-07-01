@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useLang } from "../i18n";
 import { apiRequest, getAuthToken } from "../api";
 import { getUserRoleInfo } from "../auth";
+import AdminAnalyticsWidget from "../components/AdminAnalyticsWidget";
+import { BarChart, PieChart } from "../components/AdminTrendsChart";
 
 // PUBLIC_INTERFACE
 /**
@@ -15,13 +17,12 @@ import { getUserRoleInfo } from "../auth";
  * - Only accessible by admins (enforced)
  */
 export default function AdminDashboard() {
-  // All React Hooks must be called first, unconditionally at the top.
   const { t } = useLang();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
   const [modalApp, setModalApp] = useState(null);
-  const [modalAction, setModalAction] = useState(""); // "approve"|"reject"|""
+  const [modalAction, setModalAction] = useState(""); // "approve"|"reject"|"" etc
   const [actionMsg, setActionMsg] = useState("");
   const [reload, setReload] = useState(0);
 
@@ -51,10 +52,11 @@ export default function AdminDashboard() {
   const [auditLog, setAuditLog] = useState([]);
   const [auditLoading, setAuditLoading] = useState(false);
 
-  // Always call hooks before return/conditional early return for consistency
   useEffect(() => {
     async function fetchData() {
-      setLoading(true); setErr(""); setActionMsg("");
+      setLoading(true);
+      setErr("");
+      setActionMsg("");
       try {
         const resp = await apiRequest("/admin/applications", "GET", null, getAuthToken());
         const apps = Array.isArray(resp) ? resp : (resp.applications || []);
@@ -98,7 +100,7 @@ export default function AdminDashboard() {
     // eslint-disable-next-line
   }, [reload]);
 
-  // Check admin role *after* all hooks, before any content return
+  // Role check after all hooks
   const { isAdmin } = getUserRoleInfo();
   if (!isAdmin)
     return (
@@ -107,6 +109,25 @@ export default function AdminDashboard() {
         <div>You do not have permission to view this page.</div>
       </div>
     );
+
+  // -------- ANALYTICS WIDGET AND CHART COMPUTATION ----------
+  // Status breakdown
+  const statusLabels = ["pending", "approved", "rejected", "issued"];
+  const statusColors = [colors.blue, colors.green, colors.rejected, colors.blueAccent];
+  const statusCounts = statusLabels.map(k => stats[k] || 0);
+
+  // Application submission monthly trend
+  let trendLabels = [], trendValues = [];
+  if (applications.length > 0 && applications[0]?.created_at) {
+    const countsByMonth = {};
+    applications.forEach(a => {
+      const d = new Date(a.created_at);
+      const ym = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,"0")}`;
+      countsByMonth[ym] = (countsByMonth[ym] || 0) + 1;
+    });
+    trendLabels = Object.keys(countsByMonth).sort();
+    trendValues = trendLabels.map(k => countsByMonth[k]);
+  }
 
   // Table search/filter/page
   let filtered = applications;
@@ -121,7 +142,7 @@ export default function AdminDashboard() {
   const pageCount = Math.ceil(filtered.length / rowsPerPage);
   const pageApps = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
-  // CSV export
+  // CSV export for the filtered table
   function exportCSV() {
     const header = [
       "ID", "Email", "Type", "Status", "Info", "Created At", "Updated At"
@@ -158,7 +179,7 @@ export default function AdminDashboard() {
     }
   }
 
-  // Approve/reject/issue (PATCH admin/applications/:id)
+  // Approve/reject/issue handler
   async function handleUpdateStatus(app, newStatus) {
     setActionMsg(""); setModalAction(""); setLoading(true);
     try {
@@ -172,7 +193,7 @@ export default function AdminDashboard() {
     setModalApp(null);
   }
 
-  // Table head configuration
+  // Table columns
   const columns = [
     { key: "id", label: "ID", width: 46 },
     { key: "user_email", label: "User Email", width: 160 },
@@ -182,7 +203,7 @@ export default function AdminDashboard() {
     { key: "review", label: "Review", width: 96 }
   ];
 
-  // Download button for documents (admin) — fetches file from backend and triggers download
+  // Download doc for admins
   async function handleDownloadDocument(docId, fileName) {
     try {
       const token = getAuthToken();
@@ -207,7 +228,310 @@ export default function AdminDashboard() {
     }
   }
 
-  // ... (component render unchanged from here) ...
+  // --- BEGIN COMPONENT RENDER ---
+  return (
+    <div className="container" style={{
+      maxWidth: 1050,
+      margin: "36px auto",
+      background: colors.light,
+      minHeight: "100vh",
+      border: `2px solid ${colors.gray}`,
+      borderRadius: 18,
+      boxShadow: "0 2px 12px #1e2a380e",
+      padding: "32px 20px 20px 20px",
+    }}>
+      <h1 style={{
+        color: colors.navy,
+        marginBottom: 7,
+        fontWeight: "bold",
+        fontSize: 32,
+        letterSpacing: 1
+      }}>Admin Dashboard</h1>
+      <div style={{
+        color: colors.blue,
+        fontWeight: 500,
+        marginBottom: 18,
+        fontSize: 21,
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+      }}>
+        <span role="img" aria-label="badge" style={{ fontSize: 27 }}>🛡️</span>
+        VPF System-wide Police Certificate Analytics & Application Oversight
+      </div>
+      {/* STATISTICS ANALYTICS ROW */}
+      <div style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 22,
+        marginBottom: 28,
+        justifyContent: "flex-start",
+      }}>
+        <AdminAnalyticsWidget
+          label="Total Applications"
+          value={stats.total}
+          icon="📝"
+          color={colors.navy}
+          bg={colors.blueAccent}
+        />
+        <AdminAnalyticsWidget
+          label="Pending"
+          value={stats.pending}
+          icon="⏳"
+          color="#fff"
+          bg={colors.blue}
+        />
+        <AdminAnalyticsWidget
+          label="Approved"
+          value={stats.approved}
+          icon="✅"
+          color="#fff"
+          bg={colors.green}
+        />
+        <AdminAnalyticsWidget
+          label="Rejected"
+          value={stats.rejected}
+          icon="❌"
+          color="#fff"
+          bg={colors.rejected}
+        />
+        <AdminAnalyticsWidget
+          label="Issued"
+          value={stats.issued}
+          icon="📄"
+          color={colors.navy}
+          bg={colors.gray}
+        />
+      </div>
+      {/* ANALYTICS CHARTS */}
+      <div style={{
+        display: "flex",
+        gap: 40,
+        flexWrap: "wrap",
+        marginBottom: 24,
+        alignItems: "center"
+      }}>
+        <div style={{
+          background: "#fff",
+          borderRadius: 13,
+          padding: "18px 18px 9px 18px",
+          border: "1.5px solid #e3e8ef",
+          minWidth: 195,
+        }}>
+          <div style={{
+            color: colors.navy,
+            fontWeight: 600,
+            fontSize: 18,
+            marginBottom: 6
+          }}>
+            Status Breakdown
+          </div>
+          <PieChart
+            labels={statusLabels.map(s => s[0].toUpperCase() + s.slice(1))}
+            values={statusCounts}
+            colors={statusColors}
+            radius={38}
+          />
+          <div style={{
+            display: "flex", flexWrap: "wrap", gap: 7, marginTop: 5
+          }}>
+            {statusLabels.map((lbl, i) => (
+              <span key={lbl} style={{
+                display: "inline-flex", alignItems: "center",
+                fontSize: 13, color: "#2a3950", padding: "0 7px"
+              }}>
+                <span style={{
+                  display: "inline-block", width: 12, height: 12,
+                  borderRadius: 7, background: statusColors[i], marginRight: 6
+                }} /> {lbl[0].toUpperCase() + lbl.slice(1)}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div style={{
+          background: "#fff",
+          borderRadius: 13,
+          padding: "18px 15px 14px 22px",
+          border: "1.5px solid #e3e8ef",
+          minWidth: 320,
+        }}>
+          <div style={{ color: colors.navy, fontWeight: 600, fontSize: 18, marginBottom: 9 }}>
+            Applications Submitted (by Month)
+          </div>
+          {trendLabels.length > 0 ? (
+            <BarChart
+              labels={trendLabels}
+              values={trendValues}
+              colors={trendValues.map(() => colors.blueAccent)}
+              width={Math.max(280, 39 * trendLabels.length)}
+              height={120}
+            />
+          ) : (
+            <div style={{ color: "#888", fontSize: 14, margin: "14px 8px" }}>
+              No trend data available yet.
+            </div>
+          )}
+        </div>
+      </div>
+      {/* Table and controls */}
+      <div style={{
+        background: "#fff",
+        borderRadius: 15,
+        padding: "18px 13px",
+        marginBottom: 20,
+        border: "1px solid #e3e8ef",
+        boxShadow: "0 2px 8px #1e2a3810",
+      }}>
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 6,
+          flexWrap: "wrap"
+        }}>
+          <div>
+            <input
+              style={{
+                border: "1.5px solid #d4dfea",
+                borderRadius: 7,
+                padding: "8px 13px",
+                fontSize: 15,
+                width: 180,
+                marginRight: 12
+              }}
+              type="text"
+              placeholder="Search email, type, status…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              autoComplete="off"
+            />
+            <select
+              style={{
+                border: "1.5px solid #d4dfea",
+                borderRadius: 7,
+                padding: "8px 10px",
+                fontSize: 15,
+                width: 128
+              }}
+              value={status}
+              onChange={e => setStatus(e.target.value)}
+            >
+              <option value="">All Statuses</option>
+              {statusLabels.map(s => (
+                <option key={s} value={s}>
+                  {s[0].toUpperCase() + s.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            className="theme-toggle"
+            type="button"
+            style={{
+              background: colors.navy,
+              color: "#fff",
+              fontWeight: 600,
+              fontSize: 15.3
+            }}
+            onClick={exportCSV}
+          >
+            Export CSV
+          </button>
+        </div>
+        {err && (
+          <div style={{ color: "#ce2b28", marginBottom: 10, fontWeight: 500 }}>
+            {err}
+          </div>
+        )}
+        {actionMsg && (
+          <div style={{ color: colors.green, marginBottom: 9, fontWeight: 500 }}>{actionMsg}</div>
+        )}
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", marginTop: 10, fontSize: 15, borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: colors.light }}>
+                {columns.map(col => (
+                  <th key={col.key} style={{ padding: 8, textAlign: "left", minWidth: col.width, fontWeight: 700 }}>{col.label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={columns.length}>
+                  <div style={{ padding: 22, textAlign: "center" }}>{t("loading")}</div>
+                </td></tr>
+              ) : pageApps.length === 0 ? (
+                <tr><td colSpan={columns.length}>
+                  <div style={{ padding: 18, color: "#888" }}>No applications found.</div>
+                </td></tr>
+              ) : (
+                pageApps.map((a, idx) => (
+                  <tr key={a.id || idx} style={{
+                    background: idx % 2 === 0 ? "#f9fafc" : "#e9f2fc",
+                    fontWeight: 400
+                  }}>
+                    <td style={{ padding: 8 }}>{a.id}</td>
+                    <td style={{ padding: 8 }}>{a.user_email || a.user_name}</td>
+                    <td style={{ padding: 8 }}>{a.type}</td>
+                    <td style={{ padding: 8 }}>
+                      <span style={{
+                        background: statusColor(a.status),
+                        padding: "3px 12px",
+                        borderRadius: 14,
+                        color: "#fff",
+                        fontWeight: 700,
+                        fontSize: 13,
+                        letterSpacing: 0.2,
+                      }}>
+                        {a.status}
+                      </span>
+                    </td>
+                    <td style={{ padding: 8 }}>
+                      {a.created_at ? new Date(a.created_at).toLocaleDateString() : "-"}
+                    </td>
+                    <td style={{ padding: 8 }}>
+                      {/* Example approve/reject with buttons */}
+                      {a.status === "pending" && (
+                        <>
+                          <button onClick={() => handleUpdateStatus(a, "approved")}
+                            style={{ background: colors.green, marginRight: 8 }}>Approve</button>
+                          <button onClick={() => handleUpdateStatus(a, "rejected")}
+                            style={{ background: colors.rejected }}>Reject</button>
+                        </>
+                      )}
+                      {a.status === "approved" && (
+                        <button onClick={() => handleUpdateStatus(a, "issued")}
+                          style={{ background: colors.blueAccent }}>Issue Cert</button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        {/* Paging controls */}
+        {!loading && (
+          <div style={{ marginTop: 10 }}>
+            {Array(pageCount).fill(0).map((_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => setPage(i + 1)}
+                disabled={page === i + 1}
+                style={{
+                  margin: "0 3px",
+                  background: page === i + 1 ? colors.navy : colors.gray,
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 6,
+                  padding: "5px 13px"
+                }}
+              >{i + 1}</button>
+            ))}
+          </div>
+        )}
+      </div>
+      {/* (Further audit log, modals, etc. could be placed below...) */}
+    </div>
+  );
 }
-
-// (AdminStatCard remained unchanged)
