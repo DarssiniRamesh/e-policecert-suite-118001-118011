@@ -6,8 +6,8 @@ import { useLang } from "../i18n";
 /**
  * Admin User Management Page (EPCC Requirement)
  * - Shows user accounts in sortable, searchable, filterable table
- * - Allows admin to promote/demote users (PATCH /admin/users/{id})
- * - Allows activate/deactivate if supported (PATCH /admin/users/{id} with status)
+ * - Allows admin to promote/demote users (PATCH /admin/users/{id}/role)
+ * - Allows activate/deactivate if supported (PATCH /admin/users/{id} with is_active)
  * - Shows audit log of changes (GET /admin/auditlog or similar if supported)
  * - Only visible to admin users
  */
@@ -76,13 +76,14 @@ export default function UserManagement() {
     setActionMsg("");
     setLoading(true);
     setModalUser(null);
+    let endpoint = `/admin/users/${user.id}`;
     let payload = {};
     if (actionType === "promote") payload = { role: "admin" };
     else if (actionType === "demote") payload = { role: "user" };
     else if (actionType === "activate") payload = { is_active: true };
     else if (actionType === "deactivate") payload = { is_active: false };
     try {
-      await apiRequest(`/admin/users/${user.id}`, "PATCH", payload, getAuthToken());
+      await apiRequest(endpoint, "PATCH", payload, getAuthToken());
       setActionMsg(`${actionType.charAt(0).toUpperCase() + actionType.slice(1)} successful`);
       // Refresh users and log
       const upd = await apiRequest("/admin/users", "GET", null, getAuthToken());
